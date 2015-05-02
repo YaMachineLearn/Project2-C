@@ -1,0 +1,15 @@
+# python .pyc files
+*.pyc
+
+# training / testing files
+
+# executables
+svm_empty_learn
+svm_empty_classify
+
+# c object files
+*.o
+
+# training / testing data
+MLDS_HW1_RELEASE_v1/*
+MLDS_HW2_RELEASE_v1/*
