@@ -19,8 +19,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
+#define  UTTER_COUNT 3696
 
 void        svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -54,47 +56,86 @@ SAMPLE      read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   EXAMPLE  *examples;
   long     n;       /* number of examples */
 
-  n = 2; /* replace by appropriate number of examples */
+  n = UTTER_COUNT; /* replace by appropriate number of examples */
   examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE)*n);
+  int featDim = sparm->num_features;  //69
 
-  /* fill in your code here */
-  double xArrays[2][3][4] = {  
-    { {0.0, 1.0, 2.0, 3.0} ,
-      {4.0, 5.0, 6.0, 7.0} ,
-      {8.0, 9.0, 1.0, 6.0} } ,
-    { {2.0, 1.0, 2.0, 4.0} ,
-      {8.0, 7.0, 1.0, 5.0} }
-  };
-  int yVectors[2][3] = {  
-    {0, 2, 1} ,
-    {1, 2}
-  };
-  int expLength[2] = {3, 2};
-  long i, j, k;
-  for (i = 0; i < n; i++) {
-    // LENGTH_I is the length of the i-th example, i.e.,
-    // the number of frames in the i-th utterance, and
-    // it should be replaced by an appropriate variable later on
-    examples[i].x.length = expLength[i];
-    examples[i].x.features = (double **)my_malloc(expLength[i] * sizeof(double *));
-    examples[i].y.length = expLength[i];
+  /* utterance count  */
+  int utterFrameCount[UTTER_COUNT]; // expLength
+  FILE *fpUtter;
+  //char *lineUtter = NULL;
+
+  fpUtter = fopen("parse_data/utterance_count.ark", "r");
+  // if (fpUtter == NULL) return 0;
+  int utterIndex = 0;
+  int tempValueUtter = 0;
+  while (fscanf(fpUtter, "%d", &tempValueUtter) != EOF) {
+    utterFrameCount[utterIndex] = tempValueUtter;
+    utterIndex++;
+  }
+
+  fclose(fpUtter);
+
+  /* initialize examples */
+  int i = 0;
+  for (i = 0; i < UTTER_COUNT; ++i) {
+    examples[i].x.length = utterFrameCount[i];
+    examples[i].x.features = (double **)my_malloc(utterFrameCount[i] * sizeof(double *));
+    examples[i].y.length = utterFrameCount[i];
     examples[i].y.labels = (int *)my_malloc(sizeof(int *));
-    for (j = 0; j < expLength[i]; j++) {
-      examples[i].x.features[j] = (double *)my_malloc(sparm->num_features * sizeof(double));
-      examples[i].y.labels[j] = yVectors[i][j];
-      for (k = 0; k < 4; k++) {
-        examples[i].x.features[j][k] = xArrays[i][j][k];
+  }
+
+  /* read training data */
+  FILE *dataFile;
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+
+  dataFile = fopen("parse_data/label_feature.ark", "r");
+  //if (dataFile == NULL) return 0;
+
+  int lineIndex = 1;
+  int label = 0;
+  utterIndex = 0;
+  int frameIndex = 0;
+  char *pch;
+  int dimIndex = 0;
+  double tempValue = 0;
+
+  while ((read = getline(&line, &len, dataFile)) != -1) {
+    if (lineIndex % 2 == 1) {
+      sscanf(line, "%d", &label);
+      examples[utterIndex].y.labels[frameIndex] = label;
+    }
+    else {
+      examples[utterIndex].x.features[frameIndex] = (double *)my_malloc(featDim * sizeof(double));
+      pch = strtok(line, " \n");
+      dimIndex = 0;
+      while (pch != NULL)
+      {
+        // printf("%s\n", pch);
+        sscanf(pch, "%f", &tempValue);
+        examples[utterIndex].x.features[frameIndex][dimIndex] = tempValue;
+        dimIndex++;
+        pch = strtok(NULL, " \n");
       }
+      frameIndex++;
     }
 
-    printf("\nExample %d:\n", i);
-    for ( j = 0; j < expLength[i]; j++ ) {
-      for ( k = 0; k < 4; k++ ) {
-         printf("%f ", examples[i].x.features[j][k] );
-      }
-      printf("\n");
+    if (frameIndex == utterFrameCount[utterIndex]) {
+      utterIndex++;
+      frameIndex = 0;
     }
   }
+  
+  printf("utterFrameCount[0] (474): %d\n", utterFrameCount[0]);
+  printf("utterFrameCount[3695] (222): %d\n", utterFrameCount[n - 1]);
+  printf("examples[0].y.labels[0] (37): %d\n", examples[0].y.labels[0]);
+  printf("examples[0].y.labels[473] (37): %d\n", examples[0].y.labels[473]);
+  printf("examples[0].x.features[0][0] (3.148541): %f\n", examples[0].x.features[0][0]);
+  printf("examples[0].x.features[0][68] (-0.06928831): %f\n", examples[0].x.features[0][68]);
+  printf("examples[0].x.features[473][0] (2.67818): %f\n", examples[0].x.features[473][0]);
+  printf("examples[0].x.features[473][68] (-0.02532601): %f\n", examples[0].x.features[473][68]);
 
   sample.n = n;
   sample.examples = examples;
