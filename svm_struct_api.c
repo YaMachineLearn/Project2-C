@@ -449,11 +449,23 @@ double      loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM *sparm)
      y==ybar has to be zero. sparm->loss_function is set with the -l option. */
   if(sparm->loss_function == 0) { /* type 0 loss: 0/1 loss */
                                   /* return 0, if y==ybar. return 1 else */
+    if (y.length != ybar.length) {
+      printf("Error: y and ybar length mismatch!");
+      exit(1);
+    }
+    int i, num = 0;
+    for (i = 0; i < y.length; i++) {
+      if (y.labels[i] != ybar.labels[i])
+        num++;
+    }
+    return (double)num;
   }
   else {
     /* Put your code for different loss functions here. But then
        find_most_violated_constraint_???(x, y, sm) has to return the
        highest scoring label with the largest loss. */
+    printf("Error: Unknown type of loss function!");
+    exit(1);
   }
 }
 
