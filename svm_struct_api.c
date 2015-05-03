@@ -168,7 +168,72 @@ LABEL       classify_struct_example(PATTERN x, STRUCTMODEL *sm,
   LABEL y;
 
   /* insert your code for computing the predicted label y here */
+  // use 'w' just for testing
+  // 'w' should be replaced with sm.w later
+  double w[21] = {0.0,
+                  2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
+                  2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
+  int lab, lastLab, frameIndex, i, maxCostIndex;
+  int obsFeatDim = sparm->num_features * sparm->num_classes;
+  double sum, maxCost, temp;
 
+  int **lastPhone = (int **)my_malloc(sparm->num_classes * sizeof(int *));
+  double **cost = (double **)my_malloc(sparm->num_classes * sizeof(double *));
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    lastPhone[lab] = (int *)my_malloc(x.length * sizeof(int));
+    cost[lab] = (double *)my_malloc(x.length * sizeof(double));
+  }
+
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    cost[lab][0] = 0.0;
+    for (i = 0; i < sm->sizePsi; i++) {
+      cost[lab][0] += x.features[0][i] * sm->w[1 + sparm->num_features * lab + i];
+    }    
+  }
+
+  for (frameIndex = 1; frameIndex < x.length; frameIndex++) {
+    for (lab = 0; lab < sparm->num_classes; lab++) {
+      maxCostIndex = 0;
+      sum = 0.0;
+      for (i = 0; i < sm->sizePsi; i++) {
+        sum += x.features[frameIndex][i] * sm->w[1 + sparm->num_features * lab + i];
+      }
+      maxCost = cost[0][frameIndex - 1] + sm->w[1 + obsFeatDim + lab] + sum;
+      for (lastLab = 1; lastLab < sparm->num_classes; lastLab++) {
+        temp = cost[lastLab][frameIndex - 1] + sm->w[1 + obsFeatDim + lastLab * sparm->num_classes + lab] + sum;
+        if (temp > maxCost) {
+          maxCostIndex = lastLab;
+          maxCost = temp;
+        }
+      }
+      lastPhone[lab][frameIndex] = maxCostIndex;
+      cost[lab][frameIndex] = maxCost;
+    }
+  }
+
+  maxCostIndex = 0;
+  maxCost = cost[0][x.length - 1];
+  for (lab = 1; lab < sparm->num_classes; lab++) {
+    temp = cost[lab][x.length - 1];
+    if (temp > maxCost) {
+      maxCostIndex = lab;
+      maxCost = temp;
+    }
+  }
+  y.length = x.length;
+  y.labels = (int *)my_malloc(y.length * sizeof(int));
+  y.labels[y.length - 1] = maxCostIndex;
+  for (frameIndex = y.length - 2; frameIndex >= 0; frameIndex--) {
+    maxCostIndex = lastPhone[maxCostIndex][frameIndex + 1];
+    y.labels[frameIndex] = maxCostIndex;
+  }
+
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    free(lastPhone[lab]);
+    free(cost[lab]);
+  }
+  free(lastPhone);
+  free(cost);
   return(y);
 }
 
@@ -200,31 +265,7 @@ LABEL       find_most_violated_constraint_slackrescaling(PATTERN x, LABEL y,
   LABEL ybar;
 
   /* insert your code for computing the label ybar here */
-  double w[21] = {2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
-                       2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
-  int lab, lastLab, frameIndex, i;
-  int **lastPhone = (int **)my_malloc(sparm->num_classes * sizeof(int *));
-  double **cost = (double **)my_malloc(sparm->num_classes * sizeof(double *));
-  for (lab = 0; lab < sparm->num_classes; lab++) {
-    lastPhone[lab] = (int *)my_malloc(x.length * sizeof(int));
-    cost[lab] = (double *)my_malloc(x.length * sizeof(double));
-  }
-
-  for (lab = 0; lab < sparm->num_classes; lab++) {
-    cost[lab][0] = 0.0;
-    for (i = 0; i < sm->sizePsi; i++) {
-      cost[lab][0] += x.features[0][i] * sm.w[1 + sparm->num_features * lab + i];
-    }
-    
-  }
-
-
-  for (lab = 0; lab < sparm->num_classes; lab++) {
-    free(lastPhone[lab]);
-    free(cost[lab]);
-  }
-  free(lastPhone);
-  free(cost);
+  
   return(ybar);
 }
 
@@ -256,7 +297,96 @@ LABEL       find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y,
   LABEL ybar;
 
   /* insert your code for computing the label ybar here */
+  // use 'w' just for testing
+  // 'w' should be replaced with sm.w later
+  double w[21] = {0.0,
+                  2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
+                  2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
+  int lab, lastLab, frameIndex, i, maxCostIndex;
+  int obsFeatDim = sparm->num_features * sparm->num_classes;
+  double sum, maxCost, temp;
 
+  int **lastPhone = (int **)my_malloc(sparm->num_classes * sizeof(int *));
+  double **cost = (double **)my_malloc(sparm->num_classes * sizeof(double *));
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    lastPhone[lab] = (int *)my_malloc(x.length * sizeof(int));
+    cost[lab] = (double *)my_malloc(x.length * sizeof(double));
+  }
+
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    cost[lab][0] = 0.0;
+    for (i = 0; i < sm->sizePsi; i++) {
+      cost[lab][0] += x.features[0][i] * sm->w[1 + sparm->num_features * lab + i];
+    }
+    if (lab != y.labels[0])
+      cost[lab][0] += 1.0;
+  }
+
+  for (frameIndex = 1; frameIndex < x.length; frameIndex++) {
+    for (lab = 0; lab < sparm->num_classes; lab++) {
+      maxCostIndex = 0;
+      sum = 0.0;
+      for (i = 0; i < sm->sizePsi; i++) {
+        sum += x.features[frameIndex][i] * sm->w[1 + sparm->num_features * lab + i];
+      }
+      maxCost = cost[0][frameIndex - 1] + sm->w[1 + obsFeatDim + lab] + sum;
+      for (lastLab = 1; lastLab < sparm->num_classes; lastLab++) {
+        temp = cost[lastLab][frameIndex - 1] + sm->w[1 + obsFeatDim + lastLab * sparm->num_classes + lab] + sum;
+        if (temp > maxCost) {
+          maxCostIndex = lastLab;
+          maxCost = temp;
+        }
+      }
+      if (lab != y.labels[frameIndex])
+        maxCost += 1.0;
+      lastPhone[lab][frameIndex] = maxCostIndex;
+      cost[lab][frameIndex] = maxCost;
+    }
+  }
+
+  maxCostIndex = 0;
+  maxCost = cost[0][x.length - 1];
+  for (lab = 1; lab < sparm->num_classes; lab++) {
+    temp = cost[lab][x.length - 1];
+    if (temp > maxCost) {
+      maxCostIndex = lab;
+      maxCost = temp;
+    }
+  }
+  ybar.length = x.length;
+  ybar.labels = (int *)my_malloc(ybar.length * sizeof(int));
+  ybar.labels[ybar.length - 1] = maxCostIndex;
+  for (frameIndex = ybar.length - 2; frameIndex >= 0; frameIndex--) {
+    maxCostIndex = lastPhone[maxCostIndex][frameIndex + 1];
+    ybar.labels[frameIndex] = maxCostIndex;
+  }
+
+  /*printf("cost:\n");
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
+      printf("%f ", cost[lab][frameIndex]);
+    }
+    printf("\n");
+  }
+  printf("lastPhone:\n");
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
+      printf("%d ", lastPhone[lab][frameIndex]);
+    }
+    printf("\n");
+  }
+  printf("ybar:\n");
+  for (frameIndex = 0; frameIndex < ybar.length; frameIndex++) {
+    printf("%d ", ybar.labels[frameIndex]);
+  }
+  printf("\n");*/
+
+  for (lab = 0; lab < sparm->num_classes; lab++) {
+    free(lastPhone[lab]);
+    free(cost[lab]);
+  }
+  free(lastPhone);
+  free(cost);
   return(ybar);
 }
 
