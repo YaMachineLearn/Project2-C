@@ -269,6 +269,13 @@ LABEL       classify_struct_example(PATTERN x, STRUCTMODEL *sm,
     y.labels[frameIndex] = maxCostIndex;
   }
 
+  /*printf("\nIn classify_struct_example:\nsm.w\n");
+  for (i = 0; i < sm->sizePsi + 1; i++) {
+    printf("%f ", sm->w[i]);
+  }
+  printf("\nsparm->num_classes: %d", sparm->num_classes);
+  printf("\nsparm->num_features: %d\n", sparm->num_features);*/
+
   for (lab = 0; lab < sparm->num_classes; lab++) {
     free(lastPhone[lab]);
     free(cost[lab]);
@@ -422,6 +429,11 @@ LABEL       find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y,
   }
   printf("\n");*/
 
+  /*printf("\nIn find_most_violated_constraint:\nsm.w\n");
+  for (i = 0; i < sm->sizePsi + 1; i++) {
+    printf("%f ", sm->w[i]);
+  }*/
+
   for (lab = 0; lab < sparm->num_classes; lab++) {
     free(lastPhone[lab]);
     free(cost[lab]);
@@ -556,12 +568,147 @@ void        write_struct_model(char *file, STRUCTMODEL *sm,
 			       STRUCT_LEARN_PARM *sparm)
 {
   /* Writes structural model sm to file file. */
+  FILE *modelfl;
+  long j,i,sv_num;
+  MODEL *model=sm->svm_model;
+  SVECTOR *v;
+
+  if ((modelfl = fopen (file, "w")) == NULL)
+  { perror (file); exit (1); }
+  fprintf(modelfl,"SVM-multiclass Version %s\n",INST_VERSION);
+    fprintf(modelfl,"%d # number of classes\n",
+    sparm->num_classes);
+  fprintf(modelfl,"%d # number of base features\n",
+    sparm->num_features);
+  fprintf(modelfl,"%d # loss function\n",
+    sparm->loss_function);
+  fprintf(modelfl,"%ld # kernel type\n",
+    model->kernel_parm.kernel_type);
+  fprintf(modelfl,"%ld # kernel parameter -d \n",
+    model->kernel_parm.poly_degree);
+  fprintf(modelfl,"%.8g # kernel parameter -g \n",
+    model->kernel_parm.rbf_gamma);
+  fprintf(modelfl,"%.8g # kernel parameter -s \n",
+    model->kernel_parm.coef_lin);
+  fprintf(modelfl,"%.8g # kernel parameter -r \n",
+    model->kernel_parm.coef_const);
+  fprintf(modelfl,"%s# kernel parameter -u \n",model->kernel_parm.custom);
+  fprintf(modelfl,"%ld # highest feature index \n",model->totwords);
+  fprintf(modelfl,"%ld # number of training documents \n",model->totdoc);
+  int k;
+  for (k = 0; k < sm->sizePsi; k++) {
+    fprintf(modelfl,"%lf ", sm->w[k]);
+  }
+  fprintf(modelfl,"# weight vector\n");
+ 
+  sv_num=1;
+  for(i=1;i<model->sv_num;i++) {
+   for(v=model->supvec[i]->fvec;v;v=v->next) 
+      sv_num++;
+  }
+  fprintf(modelfl,"%ld # number of support vectors plus 1 \n",sv_num);
+  fprintf(modelfl,"%.8g # threshold b, each following line is a SV (starting with alpha*y)\n",model->b);
+
+  for(i=1;i<model->sv_num;i++) {
+    for(v=model->supvec[i]->fvec;v;v=v->next) {
+      fprintf(modelfl,"%.32g ",model->alpha[i]*v->factor);
+      fprintf(modelfl,"qid:%ld ",v->kernel_id);
+      for (j=0; (v->words[j]).wnum; j++) {
+  fprintf(modelfl,"%ld:%.8g ",
+    (long)(v->words[j]).wnum,
+    (double)(v->words[j]).weight);
+      }
+      if(v->userdefined)
+  fprintf(modelfl,"#%s\n",v->userdefined);
+      else
+  fprintf(modelfl,"#\n");
+    /* NOTE: this could be made more efficient by summing the
+       alpha's of identical vectors before writing them to the
+       file. */
+    }
+  }
 }
 
 STRUCTMODEL read_struct_model(char *file, STRUCT_LEARN_PARM *sparm)
 {
   /* Reads structural model sm from file file. This function is used
      only in the prediction module, not in the learning module. */
+  FILE *modelfl;
+  STRUCTMODEL sm;
+  long i,queryid,slackid;
+  double costfactor;
+  long max_sv,max_words,ll,wpos;
+  char *line,*comment;
+  WORD *words;
+  char version_buffer[100];
+  MODEL *model;
+
+  nol_ll(file,&max_sv,&max_words,&ll); /* scan size of model file */
+  max_words+=2;
+  ll+=2;
+
+  words = (WORD *)my_malloc(sizeof(WORD)*(max_words+10));
+  line = (char *)my_malloc(sizeof(char)*ll);
+  model = (MODEL *)my_malloc(sizeof(MODEL));
+
+  if ((modelfl = fopen (file, "r")) == NULL)
+  { perror (file); exit (1); }
+
+  fscanf(modelfl,"SVM-multiclass Version %s\n",version_buffer);
+  if(strcmp(version_buffer,INST_VERSION)) {
+    perror ("Version of model-file does not match version of svm_struct_classify!"); 
+    exit (1); 
+  }
+  fscanf(modelfl,"%d%*[^\n]\n", &sparm->num_classes);  
+  fscanf(modelfl,"%d%*[^\n]\n", &sparm->num_features);  
+  fscanf(modelfl,"%d%*[^\n]\n", &sparm->loss_function);  
+  fscanf(modelfl,"%ld%*[^\n]\n", &model->kernel_parm.kernel_type);  
+  fscanf(modelfl,"%ld%*[^\n]\n", &model->kernel_parm.poly_degree);
+  fscanf(modelfl,"%lf%*[^\n]\n", &model->kernel_parm.rbf_gamma);
+  fscanf(modelfl,"%lf%*[^\n]\n", &model->kernel_parm.coef_lin);
+  fscanf(modelfl,"%lf%*[^\n]\n", &model->kernel_parm.coef_const);
+  fscanf(modelfl,"%[^#]%*[^\n]\n", model->kernel_parm.custom);
+
+  fscanf(modelfl,"%ld%*[^\n]\n", &model->totwords);
+  fscanf(modelfl,"%ld%*[^\n]\n", &model->totdoc);
+  sm.w = (double *)my_malloc((model->totwords + 1) * sizeof(double));
+  double temp = 0.2;
+  sm.w[0] = 0.0;
+  int k;
+  printf("temp:\n");
+  for (k = 0; k < model->totwords; k++) {
+    fscanf(modelfl,"%lf", &(sm.w[1 + k]));
+  }
+  fscanf(modelfl,"%*[^\n]\n");
+  fscanf(modelfl,"%ld%*[^\n]\n", &model->sv_num);
+  fscanf(modelfl,"%lf%*[^\n]\n", &model->b);
+
+  model->supvec = (DOC **)my_malloc(sizeof(DOC *)*model->sv_num);
+  model->alpha = (double *)my_malloc(sizeof(double)*model->sv_num);
+  model->index=NULL;
+  model->lin_weights=NULL;
+
+  for(i=1;i<model->sv_num;i++) {
+    fgets(line,(int)ll,modelfl);
+    if(!parse_document(line,words,&(model->alpha[i]),&queryid,&slackid,
+           &costfactor,&wpos,max_words,&comment)) {
+      printf("\nParsing error while reading model file in SV %ld!\n%s",
+       i,line);
+      exit(1);
+    }
+    model->supvec[i] = create_example(-1,0,0,0.0,
+              create_svector(words,comment,1.0));
+    model->supvec[i]->fvec->kernel_id=queryid;
+  }
+  fclose(modelfl);
+  free(line);
+  free(words);
+  if(verbosity>=1) {
+    fprintf(stdout, " (%d support vectors read) ",(int)(model->sv_num-1));
+  }
+  sm.svm_model=model;
+  sm.sizePsi = model->totwords - 1;
+  return(sm);
 }
 
 void        write_label(FILE *fp, LABEL y)
