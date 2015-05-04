@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT 1 //3696
+#define  UTTER_COUNT 3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -57,7 +57,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   long     n;       /* number of examples */
 
   n = UTTER_COUNT; /* replace by appropriate number of examples */
-  examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE)*n);
+  examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE) * n);
   int featDim = 69;
 
   /* utterance count  */
@@ -65,7 +65,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   FILE *fpUtter;
   //char *lineUtter = NULL;
 
-  fpUtter = fopen("parse_data/utterance_count_1.ark", "r");
+  fpUtter = fopen("parse_data/utterance_count.ark", "r");
   // if (fpUtter == NULL) return 0;
   int utterIndex = 0;
   int tempValueUtter = 0;
@@ -91,7 +91,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   size_t len = 0;
   ssize_t read;
 
-  dataFile = fopen("parse_data/label_feature_1.ark", "r");
+  dataFile = fopen("parse_data/label_feature.ark", "r");
   //if (dataFile == NULL) return 0;
 
   int lineIndex = 1;
@@ -147,7 +147,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
 
   sample.n = n;
   sample.examples = examples;
-  return(sample);
+  return sample;
 }
 
 void init_struct_model(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm, LEARN_PARM *lparm, KERNEL_PARM *kparm)
@@ -177,7 +177,7 @@ CONSTSET init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PA
   long     i;
   WORD     words[2];
 
-  if(1) { /* normal case: start with empty set of constraints */
+  if (1) { /* normal case: start with empty set of constraints */
     c.lhs=NULL;
     c.rhs=NULL;
     c.m=0;
@@ -187,7 +187,7 @@ CONSTSET init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PA
             precision epsilon set by -e. */
     c.lhs=my_malloc(sizeof(DOC *)*sizePsi);
     c.rhs=my_malloc(sizeof(double)*sizePsi);
-    for(i=0; i<sizePsi; i++) {
+    for (i=0; i<sizePsi; i++) {
       words[0].wnum=i+1;
       words[0].weight=1.0;
       words[1].wnum=0;
@@ -197,7 +197,7 @@ CONSTSET init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PA
       c.rhs[i]=0.0;
     }
   }
-  return(c);
+  return c;
 }
 
 LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
@@ -477,7 +477,7 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   int j = 0;
   for (l = 0; l < x.length; ++l)
     for (j = 0; j < featNum; ++j)
-      psiVec[labelNum * y.labels[l] + j] = x.features[l][j];
+      psiVec[labelNum * y.labels[l] + j] += x.features[l][j];
 
   int k = 0;
   int ybegin = featNum * labelNum;
