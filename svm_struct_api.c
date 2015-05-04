@@ -24,31 +24,31 @@
 #include "svm_struct_api.h"
 #define  UTTER_COUNT 3696
 
-void        svm_struct_learn_api_init(int argc, char* argv[])
+void svm_struct_learn_api_init(int argc, char* argv[])
 {
   /* Called in learning part before anything else is done to allow
      any initializations that might be necessary. */
 }
 
-void        svm_struct_learn_api_exit()
+void svm_struct_learn_api_exit()
 {
   /* Called in learning part at the very end to allow any clean-up
      that might be necessary. */
 }
 
-void        svm_struct_classify_api_init(int argc, char* argv[])
+void svm_struct_classify_api_init(int argc, char* argv[])
 {
   /* Called in prediction part before anything else is done to allow
      any initializations that might be necessary. */
 }
 
-void        svm_struct_classify_api_exit()
+void svm_struct_classify_api_exit()
 {
   /* Called in prediction part at the very end to allow any clean-up
      that might be necessary. */
 }
 
-SAMPLE      read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
+SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
 {
   /* Reads struct examples and returns them in sample. The number of
      examples must be written into sample.n */
@@ -82,7 +82,7 @@ SAMPLE      read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
     examples[i].x.length = utterFrameCount[i];
     examples[i].x.features = (double **)my_malloc(utterFrameCount[i] * sizeof(double *));
     examples[i].y.length = utterFrameCount[i];
-    examples[i].y.labels = (int *)my_malloc(sizeof(int *));
+    examples[i].y.labels = (int *)my_malloc(sizeof(int) * utterFrameCount[i]);
   }
 
   /* read training data */
@@ -114,13 +114,14 @@ SAMPLE      read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
       while (pch != NULL)
       {
         // printf("%s\n", pch);
-        sscanf(pch, "%f", &tempValue);
+        sscanf(pch, "%lf", &tempValue);
         examples[utterIndex].x.features[frameIndex][dimIndex] = tempValue;
         dimIndex++;
         pch = strtok(NULL, " \n");
       }
       frameIndex++;
     }
+    lineIndex++;
 
     if (frameIndex == utterFrameCount[utterIndex]) {
       utterIndex++;
@@ -142,9 +143,7 @@ SAMPLE      read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   return(sample);
 }
 
-void        init_struct_model(SAMPLE sample, STRUCTMODEL *sm, 
-			      STRUCT_LEARN_PARM *sparm, LEARN_PARM *lparm, 
-			      KERNEL_PARM *kparm)
+void init_struct_model(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm, LEARN_PARM *lparm, KERNEL_PARM *kparm)
 {
   /* Initialize structmodel sm. The weight vector w does not need to be
      initialized, but you need to provide the maximum size of the
@@ -153,12 +152,10 @@ void        init_struct_model(SAMPLE sample, STRUCTMODEL *sm,
      contain the learned weights for the model. */
   sparm->num_features = 4; // 69;
   sparm->num_classes = 3; // 48;
-  sm->sizePsi = sparm->num_features * sparm->num_classes
-                + sparm->num_classes * sparm->num_classes; /* replace by appropriate number of features */
+  sm->sizePsi = sparm->num_features * sparm->num_classes + sparm->num_classes * sparm->num_classes; /* replace by appropriate number of features */
 }
 
-CONSTSET    init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm, 
-				    STRUCT_LEARN_PARM *sparm)
+CONSTSET init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Initializes the optimization problem. Typically, you do not need
      to change this function, since you want to start with an empty
@@ -196,8 +193,7 @@ CONSTSET    init_struct_constraints(SAMPLE sample, STRUCTMODEL *sm,
   return(c);
 }
 
-LABEL       classify_struct_example(PATTERN x, STRUCTMODEL *sm, 
-				    STRUCT_LEARN_PARM *sparm)
+LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Finds the label yhat for pattern x that scores the highest
      according to the linear evaluation function in sm, especially the
@@ -285,9 +281,7 @@ LABEL       classify_struct_example(PATTERN x, STRUCTMODEL *sm,
   return(y);
 }
 
-LABEL       find_most_violated_constraint_slackrescaling(PATTERN x, LABEL y, 
-						     STRUCTMODEL *sm, 
-						     STRUCT_LEARN_PARM *sparm)
+LABEL find_most_violated_constraint_slackrescaling(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Finds the label ybar for pattern x that that is responsible for
      the most violated constraint for the slack rescaling
@@ -317,9 +311,7 @@ LABEL       find_most_violated_constraint_slackrescaling(PATTERN x, LABEL y,
   return(ybar);
 }
 
-LABEL       find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, 
-						     STRUCTMODEL *sm, 
-						     STRUCT_LEARN_PARM *sparm)
+LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Finds the label ybar for pattern x that that is responsible for
      the most violated constraint for the margin rescaling
@@ -443,7 +435,7 @@ LABEL       find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y,
   return(ybar);
 }
 
-int         empty_label(LABEL y)
+int empty_label(LABEL y)
 {
   /* Returns true, if y is an empty label. An empty label might be
      returned by find_most_violated_constraint_???(x, y, sm) if there
@@ -452,8 +444,7 @@ int         empty_label(LABEL y)
   return(0);
 }
 
-SVECTOR     *psi(PATTERN x, LABEL y, STRUCTMODEL *sm,
-		 STRUCT_LEARN_PARM *sparm)
+SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Returns a feature vector describing the match between pattern x
      and label y. The feature vector is returned as a list of
@@ -475,11 +466,25 @@ SVECTOR     *psi(PATTERN x, LABEL y, STRUCTMODEL *sm,
      that ybar!=y that maximizes psi(x,ybar,sm)*sm.w (where * is the
      inner vector product) and the appropriate function of the
      loss + margin/slack rescaling method. See that paper for details. */
+  int featNum = sparm->num_features;
+  int labelNum = sparm->num_classes;
+  double *psiVec = (double *)my_malloc((featNum + labelNum) * labelNum * sizeof(double));
+
+  int l = 0;
+  int j = 0;
+  for (l = 0; l < x.length; ++l)
+    for (j = 0; j < featNum; ++j)
+      psiVec[labelNum * y.labels[l] + j] = x.features[l][j];
+
+  int k = 0;
+  int ybegin = featNum * labelNum;
+  for (k = 0; k < (y.length - 1); ++k)
+    psiVec[ybegin + (labelNum * y.labels[k]) + y.labels[k + 1]] += 1;
+
   SVECTOR *fvec = (SVECTOR *)my_malloc(sizeof(SVECTOR));
 
   /* insert code for computing the feature vector for x and y here */
-  double psiVec[21] = {2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
-                       2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
+  // double psiVec[21] = {2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0, 2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
 
   fvec->words = (WORD *)my_malloc((sm->sizePsi + 1)* sizeof(WORD));
   int i;
@@ -496,7 +501,7 @@ SVECTOR     *psi(PATTERN x, LABEL y, STRUCTMODEL *sm,
   return(fvec);
 }
 
-double      loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM *sparm)
+double loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM *sparm)
 {
   /* loss for correct label y and predicted label ybar. The loss for
      y==ybar has to be zero. sparm->loss_function is set with the -l option. */
@@ -522,16 +527,13 @@ double      loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM *sparm)
   }
 }
 
-int         finalize_iteration(double ceps, int cached_constraint,
-			       SAMPLE sample, STRUCTMODEL *sm,
-			       CONSTSET cset, double *alpha, 
-			       STRUCT_LEARN_PARM *sparm)
+int finalize_iteration(double ceps, int cached_constraint, SAMPLE sample, STRUCTMODEL *sm, CONSTSET cset, double *alpha, STRUCT_LEARN_PARM *sparm)
 {
   /* This function is called just before the end of each cutting plane iteration. ceps is the amount by which the most violated constraint found in the current iteration was violated. cached_constraint is true if the added constraint was constructed from the cache. If the return value is FALSE, then the algorithm is allowed to terminate. If it is TRUE, the algorithm will keep iterating even if the desired precision sparm->epsilon is already reached. */
   return(0);
 }
 
-void        print_struct_learning_stats(SAMPLE sample, STRUCTMODEL *sm,
+void print_struct_learning_stats(SAMPLE sample, STRUCTMODEL *sm,
 					CONSTSET cset, double *alpha, 
 					STRUCT_LEARN_PARM *sparm)
 {
@@ -540,9 +542,7 @@ void        print_struct_learning_stats(SAMPLE sample, STRUCTMODEL *sm,
      kind of statistic (e.g. training error) you might want. */
 }
 
-void        print_struct_testing_stats(SAMPLE sample, STRUCTMODEL *sm,
-				       STRUCT_LEARN_PARM *sparm, 
-				       STRUCT_TEST_STATS *teststats)
+void print_struct_testing_stats(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm, STRUCT_TEST_STATS *teststats)
 {
   /* This function is called after making all test predictions in
      svm_struct_classify and allows computing and printing any kind of
@@ -551,9 +551,7 @@ void        print_struct_testing_stats(SAMPLE sample, STRUCTMODEL *sm,
      statistics for each prediction. */
 }
 
-void        eval_prediction(long exnum, EXAMPLE ex, LABEL ypred, 
-			    STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm, 
-			    STRUCT_TEST_STATS *teststats)
+void eval_prediction(long exnum, EXAMPLE ex, LABEL ypred, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm, STRUCT_TEST_STATS *teststats)
 {
   /* This function allows you to accumlate statistic for how well the
      predicition matches the labeled example. It is called from
@@ -564,8 +562,7 @@ void        eval_prediction(long exnum, EXAMPLE ex, LABEL ypred,
   }
 }
 
-void        write_struct_model(char *file, STRUCTMODEL *sm, 
-			       STRUCT_LEARN_PARM *sparm)
+void write_struct_model(char *file, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
 {
   /* Writes structural model sm to file file. */
   FILE *modelfl;
@@ -711,12 +708,12 @@ STRUCTMODEL read_struct_model(char *file, STRUCT_LEARN_PARM *sparm)
   return(sm);
 }
 
-void        write_label(FILE *fp, LABEL y)
+void write_label(FILE *fp, LABEL y)
 {
   /* Writes label y to file handle fp. */
 } 
 
-void        free_pattern(PATTERN x) {
+void free_pattern(PATTERN x) {
   /* Frees the memory of x. */
   int i;
   for (i = 0; i < x.length; i++) {
@@ -725,12 +722,12 @@ void        free_pattern(PATTERN x) {
   free(x.features);
 }
 
-void        free_label(LABEL y) {
+void free_label(LABEL y) {
   /* Frees the memory of y. */
   free(y.labels);
 }
 
-void        free_struct_model(STRUCTMODEL sm) 
+void free_struct_model(STRUCTMODEL sm) 
 {
   /* Frees the memory of model. */
   /* if(sm.w) free(sm.w); */ /* this is free'd in free_model */
@@ -738,7 +735,7 @@ void        free_struct_model(STRUCTMODEL sm)
   /* add free calls for user defined data here */
 }
 
-void        free_struct_sample(SAMPLE s)
+void free_struct_sample(SAMPLE s)
 {
   /* Frees the memory of sample s. */
   int i;
@@ -749,7 +746,7 @@ void        free_struct_sample(SAMPLE s)
   free(s.examples);
 }
 
-void        print_struct_help()
+void print_struct_help()
 {
   /* Prints a help text that is appended to the common help text of
      svm_struct_learn. */
@@ -758,7 +755,7 @@ void        print_struct_help()
   printf("                        and there can be multiple options starting with --.\n");
 }
 
-void         parse_struct_parameters(STRUCT_LEARN_PARM *sparm)
+void parse_struct_parameters(STRUCT_LEARN_PARM *sparm)
 {
   /* Parses the command line parameters that start with -- */
   int i;
@@ -775,7 +772,7 @@ void         parse_struct_parameters(STRUCT_LEARN_PARM *sparm)
   }
 }
 
-void        print_struct_help_classify()
+void print_struct_help_classify()
 {
   /* Prints a help text that is appended to the common help text of
      svm_struct_classify. */
@@ -784,7 +781,7 @@ void        print_struct_help_classify()
   printf("                       and there can be multiple options starting with --.\n");
 }
 
-void         parse_struct_parameters_classify(STRUCT_LEARN_PARM *sparm)
+void parse_struct_parameters_classify(STRUCT_LEARN_PARM *sparm)
 {
   /* Parses the command line parameters that start with -- for the
      classification module */
@@ -799,4 +796,3 @@ void         parse_struct_parameters_classify(STRUCT_LEARN_PARM *sparm)
       }
   }
 }
-
