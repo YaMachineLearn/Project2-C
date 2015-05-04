@@ -469,15 +469,15 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
      that ybar!=y that maximizes psi(x,ybar,sm)*sm.w (where * is the
      inner vector product) and the appropriate function of the
      loss + margin/slack rescaling method. See that paper for details. */
-  int featNum = sparm->num_features;
-  int labelNum = sparm->num_classes;
+  int featNum = 69;
+  int labelNum = 48;
   double *psiVec = (double *)my_malloc((featNum + labelNum) * labelNum * sizeof(double));
 
   int l = 0;
   int j = 0;
   for (l = 0; l < x.length; ++l)
     for (j = 0; j < featNum; ++j)
-      psiVec[labelNum * y.labels[l] + j] += x.features[l][j];
+      psiVec[featNum * y.labels[l] + j] += x.features[l][j];
 
   int k = 0;
   int ybegin = featNum * labelNum;
@@ -489,19 +489,22 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   /* insert code for computing the feature vector for x and y here */
   // double psiVec[21] = {2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0, 2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
 
-  fvec->words = (WORD *)my_malloc((sm->sizePsi + 1)* sizeof(WORD));
+  fvec->words = (WORD *)my_malloc((sm->sizePsi + 1) * sizeof(WORD));
   int i;
   for (i = 0; i < sm->sizePsi; i++) {
     fvec->words[i].wnum = i + 1;
     fvec->words[i].weight = psiVec[i];
   }
   fvec->words[sm->sizePsi + 1].wnum = 0;
-  fvec->twonorm_sq=-1;
+  fvec->twonorm_sq = -1;
   fvec->userdefined = NULL;
   fvec->kernel_id = 0;
   fvec->next = NULL;
   fvec->factor = 1;
-  return(fvec);
+
+  free(psiVec);
+
+  return fvec;
 }
 
 double loss(LABEL y, LABEL ybar, STRUCT_LEARN_PARM *sparm)
