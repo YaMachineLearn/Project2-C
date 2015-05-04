@@ -718,10 +718,16 @@ void        write_label(FILE *fp, LABEL y)
 
 void        free_pattern(PATTERN x) {
   /* Frees the memory of x. */
+  int i;
+  for (i = 0; i < x.length; i++) {
+    free(x.features[i]);
+  }
+  free(x.features);
 }
 
 void        free_label(LABEL y) {
   /* Frees the memory of y. */
+  free(y.labels);
 }
 
 void        free_struct_model(STRUCTMODEL sm) 
