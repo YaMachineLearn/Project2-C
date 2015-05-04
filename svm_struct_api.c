@@ -337,9 +337,7 @@ LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMO
   /* insert your code for computing the label ybar here */
   // use 'w' just for testing
   // 'w' should be replaced with sm.w later
-  double w[21] = {0.0,
-                  2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
-                  2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
+  double w[21] = {0.0, 2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0, 2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
   int lab, lastLab, frameIndex, i, maxCostIndex;
   int obsFeatDim = sparm->num_features * sparm->num_classes;
   double sum, maxCost, temp;
