@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT 3696
+#define  UTTER_COUNT 1 //3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -58,14 +58,14 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
 
   n = UTTER_COUNT; /* replace by appropriate number of examples */
   examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE)*n);
-  int featDim = sparm->num_features;  //69
+  int featDim = 69;
 
   /* utterance count  */
   int utterFrameCount[UTTER_COUNT]; // expLength
   FILE *fpUtter;
   //char *lineUtter = NULL;
 
-  fpUtter = fopen("parse_data/utterance_count.ark", "r");
+  fpUtter = fopen("parse_data/utterance_count_1.ark", "r");
   // if (fpUtter == NULL) return 0;
   int utterIndex = 0;
   int tempValueUtter = 0;
@@ -82,7 +82,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
     examples[i].x.length = utterFrameCount[i];
     examples[i].x.features = (double **)my_malloc(utterFrameCount[i] * sizeof(double *));
     examples[i].y.length = utterFrameCount[i];
-    examples[i].y.labels = (int *)my_malloc(sizeof(int) * utterFrameCount[i]);
+    examples[i].y.labels = (int *)my_malloc(utterFrameCount[i] * sizeof(int));
   }
 
   /* read training data */
@@ -91,7 +91,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   size_t len = 0;
   ssize_t read;
 
-  dataFile = fopen("parse_data/label_feature.ark", "r");
+  dataFile = fopen("parse_data/label_feature_1.ark", "r");
   //if (dataFile == NULL) return 0;
 
   int lineIndex = 1;
@@ -138,6 +138,13 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   printf("examples[0].x.features[473][0] (2.67818): %f\n", examples[0].x.features[473][0]);
   printf("examples[0].x.features[473][68] (-0.02532601): %f\n", examples[0].x.features[473][68]);
 
+  printf("examples[n-1].y.labels[0] (37): %d\n", examples[n-1].y.labels[0]);
+  printf("examples[n-1].y.labels[221] (37): %d\n", examples[n-1].y.labels[221]);
+  //printf("examples[n-1].x.features[0][0] (2.982506): %f\n", examples[n-1].x.features[0][0]);
+  //printf("examples[n-1].x.features[0][68] (-0.06928831): %f\n", examples[n-1].x.features[0][68]);
+  printf("examples[n-1].x.features[221][0] (2.982506): %f\n", examples[n-1].x.features[221][0]);
+  printf("examples[n-1].x.features[221][68] (0.02890646): %f\n", examples[n-1].x.features[221][68]);
+
   sample.n = n;
   sample.examples = examples;
   return(sample);
@@ -150,8 +157,8 @@ void init_struct_model(SAMPLE sample, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm,
      feature space in sizePsi. This is the maximum number of different
      weights that can be learned. Later, the weight vector w will
      contain the learned weights for the model. */
-  sparm->num_features = 4; // 69;
-  sparm->num_classes = 3; // 48;
+  sparm->num_features = 69;
+  sparm->num_classes = 48;
   sm->sizePsi = sparm->num_features * sparm->num_classes + sparm->num_classes * sparm->num_classes; /* replace by appropriate number of features */
 }
 

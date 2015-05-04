@@ -1821,6 +1821,7 @@ void *my_malloc(size_t size)
   ptr=(void *)malloc(size);
   if(!ptr) { 
     perror ("Out of memory!\n"); 
+    printf("Attempt to allocate memory with size %d\n", size);
     exit (1); 
   }
   return(ptr);
