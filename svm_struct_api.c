@@ -207,9 +207,7 @@ LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *spa
   /* insert your code for computing the predicted label y here */
   // use 'w' just for testing
   // 'w' should be replaced with sm.w later
-  double w[21] = {0.0,
-                  2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0,
-                  2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
+  double w[21] = {0.0, 2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0, 2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
   int lab, lastLab, frameIndex, i, maxCostIndex;
   int obsFeatDim = sparm->num_features * sparm->num_classes;
   double sum, maxCost, temp;
@@ -533,9 +531,7 @@ int finalize_iteration(double ceps, int cached_constraint, SAMPLE sample, STRUCT
   return(0);
 }
 
-void print_struct_learning_stats(SAMPLE sample, STRUCTMODEL *sm,
-					CONSTSET cset, double *alpha, 
-					STRUCT_LEARN_PARM *sparm)
+void print_struct_learning_stats(SAMPLE sample, STRUCTMODEL *sm, CONSTSET cset, double *alpha, STRUCT_LEARN_PARM *sparm)
 {
   /* This function is called after training and allows final touches to
      the model sm. But primarly it allows computing and printing any
@@ -573,22 +569,14 @@ void write_struct_model(char *file, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   if ((modelfl = fopen (file, "w")) == NULL)
   { perror (file); exit (1); }
   fprintf(modelfl,"SVM-multiclass Version %s\n",INST_VERSION);
-    fprintf(modelfl,"%d # number of classes\n",
-    sparm->num_classes);
-  fprintf(modelfl,"%d # number of base features\n",
-    sparm->num_features);
-  fprintf(modelfl,"%d # loss function\n",
-    sparm->loss_function);
-  fprintf(modelfl,"%ld # kernel type\n",
-    model->kernel_parm.kernel_type);
-  fprintf(modelfl,"%ld # kernel parameter -d \n",
-    model->kernel_parm.poly_degree);
-  fprintf(modelfl,"%.8g # kernel parameter -g \n",
-    model->kernel_parm.rbf_gamma);
-  fprintf(modelfl,"%.8g # kernel parameter -s \n",
-    model->kernel_parm.coef_lin);
-  fprintf(modelfl,"%.8g # kernel parameter -r \n",
-    model->kernel_parm.coef_const);
+  fprintf(modelfl,"%d # number of classes\n", sparm->num_classes);
+  fprintf(modelfl,"%d # number of base features\n", sparm->num_features);
+  fprintf(modelfl,"%d # loss function\n", sparm->loss_function);
+  fprintf(modelfl,"%ld # kernel type\n", model->kernel_parm.kernel_type);
+  fprintf(modelfl,"%ld # kernel parameter -d \n", model->kernel_parm.poly_degree);
+  fprintf(modelfl,"%.8g # kernel parameter -g \n", model->kernel_parm.rbf_gamma);
+  fprintf(modelfl,"%.8g # kernel parameter -s \n", model->kernel_parm.coef_lin);
+  fprintf(modelfl,"%.8g # kernel parameter -r \n", model->kernel_parm.coef_const);
   fprintf(modelfl,"%s# kernel parameter -u \n",model->kernel_parm.custom);
   fprintf(modelfl,"%ld # highest feature index \n",model->totwords);
   fprintf(modelfl,"%ld # number of training documents \n",model->totdoc);
