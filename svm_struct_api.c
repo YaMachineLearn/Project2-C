@@ -22,9 +22,9 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT 1
 #define  UTTER_COUNT_FILENAME "parse_data/utterance_count_474.ark"
 #define  LABEL_FEATURE_FILENAME "parse_data/label_feature_474.ark"
+#define  UTTER_COUNT 10//3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -131,23 +131,21 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
     }
   }
   
-  /*
-  printf("utterFrameCount[0] (474): %d\n", utterFrameCount[0]);
-  printf("utterFrameCount[3695] (222): %d\n", utterFrameCount[n - 1]);
-  printf("examples[0].y.labels[0] (37): %d\n", examples[0].y.labels[0]);
-  printf("examples[0].y.labels[473] (37): %d\n", examples[0].y.labels[473]);
-  printf("examples[0].x.features[0][0] (3.148541): %f\n", examples[0].x.features[0][0]);
-  printf("examples[0].x.features[0][68] (-0.06928831): %f\n", examples[0].x.features[0][68]);
-  printf("examples[0].x.features[473][0] (2.67818): %f\n", examples[0].x.features[473][0]);
-  printf("examples[0].x.features[473][68] (-0.02532601): %f\n", examples[0].x.features[473][68]);
+  // printf("utterFrameCount[0] (474): %d\n", utterFrameCount[0]);
+  // printf("utterFrameCount[3695] (222): %d\n", utterFrameCount[n - 1]);
+  // printf("examples[0].y.labels[0] (37): %d\n", examples[0].y.labels[0]);
+  // printf("examples[0].y.labels[473] (37): %d\n", examples[0].y.labels[473]);
+  // printf("examples[0].x.features[0][0] (3.148541): %f\n", examples[0].x.features[0][0]);
+  // printf("examples[0].x.features[0][68] (-0.06928831): %f\n", examples[0].x.features[0][68]);
+  // printf("examples[0].x.features[473][0] (2.67818): %f\n", examples[0].x.features[473][0]);
+  // printf("examples[0].x.features[473][68] (-0.02532601): %f\n", examples[0].x.features[473][68]);
 
-  printf("examples[n-1].y.labels[0] (37): %d\n", examples[n-1].y.labels[0]);
-  printf("examples[n-1].y.labels[221] (37): %d\n", examples[n-1].y.labels[221]);
+  // printf("examples[n-1].y.labels[0] (37): %d\n", examples[n-1].y.labels[0]);
+  // printf("examples[n-1].y.labels[221] (37): %d\n", examples[n-1].y.labels[221]);
   //printf("examples[n-1].x.features[0][0] (2.982506): %f\n", examples[n-1].x.features[0][0]);
   //printf("examples[n-1].x.features[0][68] (-0.06928831): %f\n", examples[n-1].x.features[0][68]);
-  printf("examples[n-1].x.features[221][0] (2.982506): %f\n", examples[n-1].x.features[221][0]);
-  printf("examples[n-1].x.features[221][68] (0.02890646): %f\n", examples[n-1].x.features[221][68]);
-  */
+  // printf("examples[n-1].x.features[221][0] (2.982506): %f\n", examples[n-1].x.features[221][0]);
+  // printf("examples[n-1].x.features[221][68] (0.02890646): %f\n", examples[n-1].x.features[221][68]);
 
   sample.n = n;
   sample.examples = examples;
@@ -232,7 +230,7 @@ LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *spa
 
   for (lab = 0; lab < sparm->num_classes; lab++) {
     cost[lab][0] = 0.0;
-    for (i = 0; i < sm->sizePsi; i++) {
+    for (i = 0; i < sparm->num_features; i++) {
       cost[lab][0] += x.features[0][i] * sm->w[1 + sparm->num_features * lab + i];
     }    
   }
@@ -241,7 +239,7 @@ LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *spa
     for (lab = 0; lab < sparm->num_classes; lab++) {
       maxCostIndex = 0;
       sum = 0.0;
-      for (i = 0; i < sm->sizePsi; i++) {
+      for (i = 0; i < sparm->num_features; i++) {
         sum += x.features[frameIndex][i] * sm->w[1 + sparm->num_features * lab + i];
       }
       maxCost = cost[0][frameIndex - 1] + sm->w[1 + obsFeatDim + lab] + sum;
@@ -274,12 +272,12 @@ LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *spa
     y.labels[frameIndex] = maxCostIndex;
   }
 
-  /*printf("\nIn classify_struct_example:\nsm.w\n");
-  for (i = 0; i < sm->sizePsi + 1; i++) {
-    printf("%f ", sm->w[i]);
-  }
-  printf("\nsparm->num_classes: %d", sparm->num_classes);
-  printf("\nsparm->num_features: %d\n", sparm->num_features);*/
+  // printf("\nIn classify_struct_example:\nsm.w\n");
+  // for (i = 0; i < sm->sizePsi + 1; i++) {
+  //   printf("%f ", sm->w[i]);
+  // }
+  // printf("\nsparm->num_classes: %d", sparm->num_classes);
+  // printf("\nsparm->num_features: %d\n", sparm->num_features);
 
   for (lab = 0; lab < sparm->num_classes; lab++) {
     free(lastPhone[lab]);
@@ -362,7 +360,7 @@ LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMO
 
   for (lab = 0; lab < sparm->num_classes; lab++) {
     cost[lab][0] = 0.0;
-    for (i = 0; i < sm->sizePsi; i++) {
+    for (i = 0; i < sparm->num_features; i++) {
       cost[lab][0] += x.features[0][i] * sm->w[1 + sparm->num_features * lab + i];
     }
     if (lab != y.labels[0])
@@ -373,7 +371,7 @@ LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMO
     for (lab = 0; lab < sparm->num_classes; lab++) {
       maxCostIndex = 0;
       sum = 0.0;
-      for (i = 0; i < sm->sizePsi; i++) {
+      for (i = 0; i < sparm->num_features; i++) {
         sum += x.features[frameIndex][i] * sm->w[1 + sparm->num_features * lab + i];
       }
       maxCost = cost[0][frameIndex - 1] + sm->w[1 + obsFeatDim + lab] + sum;
@@ -400,6 +398,7 @@ LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMO
       maxCost = temp;
     }
   }
+  // printf("my_maxCost: %f\n", maxCost);
   ybar.length = x.length;
   ybar.labels = (int *)my_malloc(ybar.length * sizeof(int));
   ybar.labels[ybar.length - 1] = maxCostIndex;
@@ -408,30 +407,92 @@ LABEL find_most_violated_constraint_marginrescaling(PATTERN x, LABEL y, STRUCTMO
     ybar.labels[frameIndex] = maxCostIndex;
   }
 
-  /*printf("cost:\n");
-  for (lab = 0; lab < sparm->num_classes; lab++) {
-    for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
-      printf("%f ", cost[lab][frameIndex]);
-    }
-    printf("\n");
-  }
-  printf("lastPhone:\n");
-  for (lab = 0; lab < sparm->num_classes; lab++) {
-    for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
-      printf("%d ", lastPhone[lab][frameIndex]);
-    }
-    printf("\n");
-  }
-  printf("ybar:\n");
-  for (frameIndex = 0; frameIndex < ybar.length; frameIndex++) {
-    printf("%d ", ybar.labels[frameIndex]);
-  }
-  printf("\n");*/
+  // SVECTOR *svec = psi(x, ybar, sm, sparm);
+  // printf("the_maxCost %f\n", sprod_ns(sm->w, svec) + loss(y, ybar, sparm));
+  // double maxCost2 = 0.0;
+  // for (i = 0; i < sm->sizePsi + 1; i++) {
+  //   maxCost2 += sm->w[svec->words[i].wnum] * svec->words[i].weight;
+  //   if (svec->words[i].weight > 1000)
+  //     printf("weight is %f when i = %d\n", svec->words[i].weight, i);
+  //   if (svec->words[i].wnum == 0)
+  //     printf("wnum is 0 when i = %d\n", i);
+  // }
+  // maxCost2 += + loss(y, ybar, sparm);
+  // printf("maxCost2: %f\n", maxCost2);
 
-  /*printf("\nIn find_most_violated_constraint:\nsm.w\n");
-  for (i = 0; i < sm->sizePsi + 1; i++) {
-    printf("%f ", sm->w[i]);
-  }*/
+  // int lab1, lab2, lab3, lab4, lab5;
+  // int maxIndex[5];
+  // LABEL ybar2;
+  // ybar2.length = y.length;
+  // ybar2.labels = (int *)my_malloc(y.length * sizeof(int));
+  // ybar2.labels[0] = 0;
+  // ybar2.labels[1] = 0;
+  // ybar2.labels[2] = 0;
+  // ybar2.labels[3] = 0;
+  // ybar2.labels[4] = 0;
+  // SVECTOR *svec2 = psi(x, ybar2, sm, sparm);
+  // maxCost = sprod_ns(sm->w, svec2) + loss(y, ybar2, sparm);
+  // maxIndex[0] = 0;
+  // maxIndex[1] = 0;
+  // maxIndex[2] = 0;
+  // maxIndex[3] = 0;
+  // maxIndex[4] = 0;
+  // for (lab1 = 0; lab1 < sparm->num_classes; lab1++) {
+  //   for (lab2 = 0; lab2 < sparm->num_classes; lab2++) {
+  //     for (lab3 = 0; lab3 < sparm->num_classes; lab3++) {
+  //       for (lab4 = 0; lab4 < sparm->num_classes; lab4++) {
+  //         for (lab5 = 0; lab5 < sparm->num_classes; lab5++) {
+  //           ybar2.labels[0] = lab1;
+  //           ybar2.labels[1] = lab2;
+  //           ybar2.labels[2] = lab3;
+  //           ybar2.labels[3] = lab4;
+  //           ybar2.labels[4] = lab5;
+  //           svec2 = psi(x, ybar2, sm, sparm);
+  //           temp = sprod_ns(sm->w, svec2) + loss(y, ybar2, sparm);
+  //           // if (lab1 == 1 && lab2 == 1 && lab3 == 2)
+  //           //   printf("temp = %f, maxCost = %f\n", temp, maxCost);
+  //           if (temp > maxCost) {
+  //             // if (lab1 == 1 && lab2 == 1 && lab3 == 2)
+  //             //   printf("Go in!\n");
+  //             maxCost = temp;
+  //             maxIndex[0] = lab1;
+  //             maxIndex[1] = lab2;
+  //             maxIndex[2] = lab3;
+  //             maxIndex[3] = lab4;
+  //             maxIndex[4] = lab5;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  // printf("maxCost = %f, maxIndex = [%d][%d][%d][%d][%d]\n", maxCost, maxIndex[0], maxIndex[1], maxIndex[2], maxIndex[3], maxIndex[4]);
+
+  // printf("cost:\n");
+  // for (lab = 0; lab < sparm->num_classes; lab++) {
+  //   for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
+  //     printf("%f ", cost[lab][frameIndex]);
+  //   }
+  //   printf("\n");
+  // }
+  // printf("lastPhone:\n");
+  // for (lab = 0; lab < sparm->num_classes; lab++) {
+  //   for (frameIndex = 0; frameIndex < x.length; frameIndex++) {
+  //     printf("%d ", lastPhone[lab][frameIndex]);
+  //   }
+  //   printf("\n");
+  // }
+  // printf("ybar:\n");
+  // for (frameIndex = 0; frameIndex < ybar.length; frameIndex++) {
+  //   printf("%d ", ybar.labels[frameIndex]);
+  // }
+  // printf("\n");
+
+  // printf("\nIn find_most_violated_constraint:\nsm.w\n");
+  // for (i = 0; i < sm->sizePsi + 1; i++) {
+  //   if (sm->w[i] != 0.0)
+  //     printf("%d:%f ", i, sm->w[i]);
+  // }
 
   for (lab = 0; lab < sparm->num_classes; lab++) {
     free(lastPhone[lab]);
@@ -448,6 +509,8 @@ int empty_label(LABEL y)
      returned by find_most_violated_constraint_???(x, y, sm) if there
      is no incorrect label that can be found for x, or if it is unable
      to label x at all */
+  if (y.length == 0)
+    return 1;
   return(0);
 }
 
@@ -477,8 +540,9 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   int labelNum = 48;
   double *psiVec = (double *)my_malloc((featNum + labelNum) * labelNum * sizeof(double));
 
-  int l = 0;
-  int j = 0;
+  int i, l ,j;
+  for (i = 0; i < (featNum + labelNum) * labelNum; i++)
+    psiVec[i] = 0.0;
   for (l = 0; l < x.length; ++l)
     for (j = 0; j < featNum; ++j)
       psiVec[featNum * y.labels[l] + j] += x.features[l][j];
@@ -494,7 +558,6 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   // double psiVec[21] = {2.0, 1.0, 6.0, 3.0, 7.0, 2.0, 1.0, 5.0, 3.0, 4.0, 4.0, 2.0, 2.0, 4.0, 3.0, 2.0, 2.0, 4.0, 3.0, 1.0, 1.0};
 
   fvec->words = (WORD *)my_malloc((sm->sizePsi + 1) * sizeof(WORD));
-  int i;
   for (i = 0; i < sm->sizePsi; i++) {
     fvec->words[i].wnum = i + 1;
     fvec->words[i].weight = psiVec[i];
@@ -592,11 +655,12 @@ void write_struct_model(char *file, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
   fprintf(modelfl,"%s# kernel parameter -u \n",model->kernel_parm.custom);
   fprintf(modelfl,"%ld # highest feature index \n",model->totwords);
   fprintf(modelfl,"%ld # number of training documents \n",model->totdoc);
+  fprintf(modelfl,"%ld # sizePsi \n", sm->sizePsi);
   int k;
-  for (k = 0; k < sm->sizePsi; k++) {
+  for (k = 1; k < sm->sizePsi + 1; k++) {
     fprintf(modelfl,"%lf ", sm->w[k]);
   }
-  fprintf(modelfl,"# weight vector\n");
+  fprintf(modelfl,"# weight vector (index 1 to sizePsi)\n");
  
   sv_num=1;
   for(i=1;i<model->sv_num;i++) {
@@ -668,12 +732,13 @@ STRUCTMODEL read_struct_model(char *file, STRUCT_LEARN_PARM *sparm)
 
   fscanf(modelfl,"%ld%*[^\n]\n", &model->totwords);
   fscanf(modelfl,"%ld%*[^\n]\n", &model->totdoc);
-  sm.w = (double *)my_malloc((model->totwords + 1) * sizeof(double));
+  fscanf(modelfl,"%ld%*[^\n]\n", &(sm.sizePsi));
+  sm.w = (double *)my_malloc((sm.sizePsi + 1) * sizeof(double));
   double temp = 0.2;
   sm.w[0] = 0.0;
   int k;
   printf("temp:\n");
-  for (k = 0; k < model->totwords; k++) {
+  for (k = 0; k < sm.sizePsi; k++) {
     fscanf(modelfl,"%lf", &(sm.w[1 + k]));
   }
   fscanf(modelfl,"%*[^\n]\n");
@@ -704,7 +769,6 @@ STRUCTMODEL read_struct_model(char *file, STRUCT_LEARN_PARM *sparm)
     fprintf(stdout, " (%d support vectors read) ",(int)(model->sv_num-1));
   }
   sm.svm_model=model;
-  sm.sizePsi = model->totwords - 1;
   return(sm);
 }
 
