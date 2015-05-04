@@ -22,7 +22,9 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT 3696
+#define  UTTER_COUNT 1
+#define  UTTER_COUNT_FILENAME "parse_data/utterance_count_474.ark"
+#define  LABEL_FEATURE_FILENAME "parse_data/label_feature_474.ark"
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -65,7 +67,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   FILE *fpUtter;
   //char *lineUtter = NULL;
 
-  fpUtter = fopen("parse_data/utterance_count.ark", "r");
+  fpUtter = fopen(UTTER_COUNT_FILENAME, "r");
   // if (fpUtter == NULL) return 0;
   int utterIndex = 0;
   int tempValueUtter = 0;
@@ -91,7 +93,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   size_t len = 0;
   ssize_t read;
 
-  dataFile = fopen("parse_data/label_feature.ark", "r");
+  dataFile = fopen(LABEL_FEATURE_FILENAME, "r");
   //if (dataFile == NULL) return 0;
 
   int lineIndex = 1;
@@ -129,6 +131,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
     }
   }
   
+  /*
   printf("utterFrameCount[0] (474): %d\n", utterFrameCount[0]);
   printf("utterFrameCount[3695] (222): %d\n", utterFrameCount[n - 1]);
   printf("examples[0].y.labels[0] (37): %d\n", examples[0].y.labels[0]);
@@ -144,6 +147,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   //printf("examples[n-1].x.features[0][68] (-0.06928831): %f\n", examples[n-1].x.features[0][68]);
   printf("examples[n-1].x.features[221][0] (2.982506): %f\n", examples[n-1].x.features[221][0]);
   printf("examples[n-1].x.features[221][68] (0.02890646): %f\n", examples[n-1].x.features[221][68]);
+  */
 
   sample.n = n;
   sample.examples = examples;
@@ -495,7 +499,7 @@ SVECTOR *psi(PATTERN x, LABEL y, STRUCTMODEL *sm, STRUCT_LEARN_PARM *sparm)
     fvec->words[i].wnum = i + 1;
     fvec->words[i].weight = psiVec[i];
   }
-  fvec->words[sm->sizePsi + 1].wnum = 0;
+  fvec->words[sm->sizePsi].wnum = 0;
   fvec->twonorm_sq = -1;
   fvec->userdefined = NULL;
   fvec->kernel_id = 0;
