@@ -33,3 +33,9 @@ for i in xrange(len(trainFrameNames)):
 numList.append(num)
 
 parse.outputParse(numList, OUTPUT_FRAMENAME_FILE_NAME)
+
+print 'Writing file...'
+t2 = time.time()
+parse.outputFeatureParse(trainLabelIndices, trainFeats, OUTPUT_FEATURE_FILE_NAME)
+t3 = time.time()
+print '...costs ', t3 - t2, ' seconds\n'

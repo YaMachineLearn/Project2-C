@@ -84,13 +84,15 @@ def outputParse(trainParameter, OUTPUT_FILE_NAME):
             if i != len(trainParameter) - 1:
                 testFile.write('\n')
 
-def outputFeatureParse(trainParameter, OUTPUT_FILE_NAME):
+def outputFeatureParse(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
     with open(OUTPUT_FILE_NAME, 'w') as testFile:
-        for i in xrange(len(trainParameter)):
-            for j in xrange(len(trainParameter[i])):
-                if j == len(trainParameter[i]) - 1:
-                    testFile.write(str(trainParameter[i][j]))
+        for i in xrange(len(trainParameter1)):
+            testFile.write(str(trainParameter1[i]))
+            testFile.write('\n')
+            for j in xrange(len(trainParameter2[i])):
+                if j == len(trainParameter2[i]) - 1:
+                    testFile.write(str(trainParameter2[i][j]))
                 else:
-                    testFile.write(str(trainParameter[i][j]) + ' ')
-            if i != len(trainParameter) - 1:
+                    testFile.write(str(trainParameter2[i][j]) + ' ')
+            if i != len(trainParameter2) - 1:
                 testFile.write('\n')
