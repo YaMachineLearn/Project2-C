@@ -22,9 +22,9 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT_FILENAME "parse_data/utterance_count_474.ark"
-#define  LABEL_FEATURE_FILENAME "parse_data/label_feature_474.ark"
-#define  UTTER_COUNT 10//3696
+#define  UTTER_COUNT_FILENAME "parse_data/utterance_count_2.ark"
+#define  LABEL_FEATURE_FILENAME "parse_data/label_feature_2.ark"
+#define  UTTER_COUNT 2//3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -775,6 +775,15 @@ STRUCTMODEL read_struct_model(char *file, STRUCT_LEARN_PARM *sparm)
 void write_label(FILE *fp, LABEL y)
 {
   /* Writes label y to file handle fp. */
+  if (fp == NULL) {
+    perror ("Error: File cannot be opened in write_label!");
+    exit (1);
+  }
+  int i;
+  for (i = 0; i < y.length; i++) {
+    fprintf(fp, "%d ", y.labels[i]);
+  }
+  fprintf(fp, "\n");
 } 
 
 void free_pattern(PATTERN x) {
