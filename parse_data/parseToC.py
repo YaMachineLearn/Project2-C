@@ -4,11 +4,10 @@ import numpy
 import time
 from operator import add
 
-TRAIN_FEATURE_FILENAME  	= "Project2-C/MLDS_HW2_RELEASE_v1/fbank/train.ark"
-TRAIN_LABEL_FILENAME    	= "Project2-C/MLDS_HW2_RELEASE_v1/label/train.lab"
-OUTPUT_FRAMENAME_FILE_NAME	= "parse/frame_name.ark"
-OUTPUT_FEATURE_FILE_NAME	= "parse/feature.ark"
-OUTPUT_LABEL_FILE_NAME		= "parse/label.lab"
+TRAIN_FEATURE_FILENAME  	= "MLDS_HW2_RELEASE_v1/fbank/train.ark"
+TRAIN_LABEL_FILENAME    	= "MLDS_HW2_RELEASE_v1/label/train.lab"
+OUTPUT_UTTERANCE_FILENAME	= "utterance_count.ark"
+OUTPUT_FEATURE_FILENAME		= "label_feature.ark"
 
 
 print 'Parsing data...'
@@ -32,10 +31,10 @@ for i in xrange(len(trainFrameNames)):
 		num = 1
 numList.append(num)
 
-parse.outputParse(numList, OUTPUT_FRAMENAME_FILE_NAME)
+parse.outputParse(numList, OUTPUT_UTTERANCE_FILENAME)
 
 print 'Writing file...'
 t2 = time.time()
-parse.outputFeatureParse(trainLabelIndices, trainFeats, OUTPUT_FEATURE_FILE_NAME)
+parse.outputFeatureParse(trainLabelIndices, trainFeats, OUTPUT_FEATURE_FILENAME)
 t3 = time.time()
 print '...costs ', t3 - t2, ' seconds\n'
