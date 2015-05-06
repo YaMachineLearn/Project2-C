@@ -7,9 +7,9 @@ from operator import add
 TRAIN_FEATURE_FILENAME  	= "MLDS_HW2_RELEASE_v1/fbank/train.ark"
 TRAIN_LABEL_FILENAME    	= "MLDS_HW2_RELEASE_v1/label/train.lab"
 TEST_FEATURE_FILENAME   	= "MLDS_HW2_RELEASE_v1/fbank/test.ark"
-OUTPUT_UTTERANCE_FILENAME	= "utterance_count.ark"
-OUTPUT_FEATURE_FILENAME		= "label_feature.ark"
-OUTPUT_TEST_FILENAME		= "n1_feature.ark"
+OUTPUT_UTTERANCE_FILENAME	= "train_utterance_count.ark"
+OUTPUT_FEATURE_FILENAME		= "train_label_feature.ark"
+OUTPUT_TEST_FILENAME		= "test_n1_feature.ark"
 
 
 print 'Parsing data...'
