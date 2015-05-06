@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT_FILENAME "parse_data/utterance_count_1.ark"
-#define  LABEL_FEATURE_FILENAME "parse_data/label_feature_1.ark"
-#define  UTTER_COUNT 1//3696
+#define  UTTER_COUNT 2//3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -62,12 +60,16 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE) * n);
   int featDim = 69;
 
+  /* parse filenames */
+  char *file1 = strtok(file, ",");
+  char *file2 = strtok(NULL, ",");
+
   /* utterance count  */
   int utterFrameCount[UTTER_COUNT]; // expLength
   FILE *fpUtter;
   //char *lineUtter = NULL;
 
-  fpUtter = fopen(UTTER_COUNT_FILENAME, "r");
+  fpUtter = fopen(file1, "r");
   // if (fpUtter == NULL) return 0;
   int utterIndex = 0;
   int tempValueUtter = 0;
@@ -93,7 +95,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   size_t len = 0;
   ssize_t read;
 
-  dataFile = fopen(LABEL_FEATURE_FILENAME, "r");
+  dataFile = fopen(file2, "r");
   //if (dataFile == NULL) return 0;
 
   int lineIndex = 1;
