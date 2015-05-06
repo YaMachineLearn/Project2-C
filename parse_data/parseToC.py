@@ -4,8 +4,8 @@ import numpy
 import time
 from operator import add
 
-TRAIN_FEATURE_FILENAME  	= "MLDS_HW2_RELEASE_v1/fbank/train.ark"
-TRAIN_LABEL_FILENAME    	= "MLDS_HW2_RELEASE_v1/label/train.lab"
+TRAIN_FEATURE_FILENAME  	= "Project2-C/MLDS_HW2_RELEASE_v1/fbank/train.ark"
+TRAIN_LABEL_FILENAME    	= "Project2-C/MLDS_HW2_RELEASE_v1/label/train.lab"
 OUTPUT_FRAMENAME_FILE_NAME	= "parse/frame_name.ark"
 OUTPUT_FEATURE_FILE_NAME	= "parse/feature.ark"
 OUTPUT_LABEL_FILE_NAME		= "parse/label.lab"
