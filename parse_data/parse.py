@@ -77,14 +77,14 @@ def outputPartB(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
         for i in xrange(len(trimmedTestFrameNames)):
             testCsvFile.write('\n' + trimmedTestFrameNames[i] + ',' + testLabelStrings[i])
 
-def outputParse(trainParameter, OUTPUT_FILE_NAME):
+def outputUtteranceCount(trainParameter, OUTPUT_FILE_NAME):
     with open(OUTPUT_FILE_NAME, 'w') as testFile:
         for i in xrange(len(trainParameter)):
             testFile.write(str(trainParameter[i]))
             if i != len(trainParameter) - 1:
                 testFile.write('\n')
 
-def outputFeatureParse(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
+def outputFeatureParseToC(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
     with open(OUTPUT_FILE_NAME, 'w') as testFile:
         for i in xrange(len(trainParameter1)):
             testFile.write(str(trainParameter1[i]))
@@ -95,4 +95,17 @@ def outputFeatureParse(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
                 else:
                     testFile.write(str(trainParameter2[i][j]) + ' ')
             if i != len(trainParameter2) - 1:
+                testFile.write('\n')
+
+def outputTestParseToC(trainParameter, OUTPUT_FILE_NAME):
+    with open(OUTPUT_FILE_NAME, 'w') as testFile:
+        for i in xrange(len(trainParameter)):
+            testFile.write(str(-1))
+            testFile.write('\n')
+            for j in xrange(len(trainParameter[i])):
+                if j == len(trainParameter[i]) - 1:
+                    testFile.write(str(trainParameter[i][j]))
+                else:
+                    testFile.write(str(trainParameter[i][j]) + ' ')
+            if i != len(trainParameter) - 1:
                 testFile.write('\n')

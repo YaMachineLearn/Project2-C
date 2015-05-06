@@ -6,14 +6,17 @@ from operator import add
 
 TRAIN_FEATURE_FILENAME  	= "MLDS_HW2_RELEASE_v1/fbank/train.ark"
 TRAIN_LABEL_FILENAME    	= "MLDS_HW2_RELEASE_v1/label/train.lab"
+TEST_FEATURE_FILENAME   	= "MLDS_HW2_RELEASE_v1/fbank/test.ark"
 OUTPUT_UTTERANCE_FILENAME	= "utterance_count.ark"
 OUTPUT_FEATURE_FILENAME		= "label_feature.ark"
+OUTPUT_TEST_FILENAME		= "n1_feature.ark"
 
 
 print 'Parsing data...'
 t0 = time.time()
 trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
 trainLabelIndices = labelUtil.labelsToIndices(trainLabels)
+testFeats, testFrameNames = parse.parseTestData(TEST_FEATURE_FILENAME)
 t1 = time.time()
 print '...costs ', t1 - t0, ' seconds\n'
 
@@ -31,10 +34,10 @@ for i in xrange(len(trainFrameNames)):
 		num = 1
 numList.append(num)
 
-parse.outputParse(numList, OUTPUT_UTTERANCE_FILENAME)
-
 print 'Writing file...'
 t2 = time.time()
-parse.outputFeatureParse(trainLabelIndices, trainFeats, OUTPUT_FEATURE_FILENAME)
+parse.outputUtteranceCount(numList, OUTPUT_UTTERANCE_FILENAME)
+parse.outputFeatureParseToC(trainLabelIndices, trainFeats, OUTPUT_FEATURE_FILENAME)
+parse.outputTestParseToC(testFeats, OUTPUT_TEST_FILENAME)
 t3 = time.time()
 print '...costs ', t3 - t2, ' seconds\n'
