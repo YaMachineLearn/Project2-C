@@ -13,10 +13,20 @@ LDFLAGS =  $(SFLAGS) -O3 -lm -Wall
 #LDFLAGS = $(SFLAGS) -pg -lm -Wall 
 
 all: svm_empty_learn svm_empty_classify
+	mkdir -p output
+	mkdir -p parse_data
 
 .PHONY: clean
 clean: svm_light_clean svm_struct_clean
 	rm -f *.o *.tcov *.d core gmon.out *.stackdump 
+
+run: parse_data/train_lab_feature.ark svm_empty_learn svm_empty_classify
+	./svm_empty_learn -c 1.0 parse_data/train_utterance_count.ark,parse_data/train_label_feature.ark output/model.dat
+	./svm_empty_classify parse_data/test_utterance_count.ark,parse_data/test_n1_feature.ark output/model.dat output/predict.dat
+	python python/main_resultToCsv.py
+
+parse_data/train_lab_feature.ark:
+	python python/parseToC.py # parse_data/test_n1_feature.ark will be produced also
 
 #-----------------------#
 #----   SVM-light   ----#
