@@ -28,6 +28,13 @@ def indices48Toindices39(indexList):
     indices39 = [ DICT_INDEX48_INDEX39[index] for index in indexList ]
     return indices39
 
+def indicesToCharString(indexList):
+    #input: [0, 37, 8]
+    #output: 'aLi'
+    charList = [ DICT_INDEX_CHAR[index] for index in indexList ]
+    charString = ''.join(charList)
+    return charString
+
 def trimIndices(indexList):
     #input: [37, 37, 1, 1, 1, 37, 37, 8, 8, 37, 37]
     #output: [1, 37, 8]
@@ -53,17 +60,42 @@ def trimIndices(indexList):
 
     return trimmedIndexList
 
+def smoothLabels(indexList, windowSize=5):
+    if windowSize < 1:
+        print "smoothLabels ereror: windowSize is smaller than 1."
+        return None
+    if len(indexList) <= windowSize:
+        print "smoothLabels ereror: length of indexList is smaller than or equal to windowSize."
+        return None
 
+    smoothedLabelList = list()
+
+    for i in xrange( len(indexList) - windowSize + 1 ):
+        smoothedLabelList.append( most_common( indexList[i:i+windowSize] ) )
+
+    return smoothedLabelList
+
+
+def most_common(lst):
+    #find most frequently appeared element
+    return max(lst, key=lst.count)
 
 if __name__ == '__main__':
     print labelsToIndices(['aa', 'sil', 'ch'])
     print indicesToChars([0, 37, 8])
     print indices48Toindices39([0, 1, 2, 3, 4, 5])
+    print indicesToCharString([0, 37, 8])
 
     print
-    labels = ['sil', 'sil', 'sil', 'sil', 'ch', 'ch', 'sil', 'sil', 'sil', 'aa', 'aa', 'aa', 'sil', 'sil']
+    labels = ['sil', 'sil', 'sil', 'sil', 'ch', 'ch', 'sil', 'sil', 'sil', 'aa', 'ao', 'aa', 'sil', 'sil']
     print labels
-    indices = labelsToIndices(labels)
-    print indices
-    trimmedIndices = trimIndices(indices)
+    indices48 = labelsToIndices(labels)
+    print indices48
+    indices39 = indices48Toindices39(indices48)
+    print indices39
+    trimmedIndices = trimIndices(indices39)
     print trimmedIndices
+    charString = indicesToCharString(trimmedIndices)
+    print charString
+
+    print smoothLabels( [1,1,2,2,2,5,2,2,3,3,3,6,6,3,3,3,8,8,8], 3 )

@@ -31,12 +31,28 @@ def parseTestData(TEST_FEATURE_FILENAME):
     #parse testing features
     with open(TEST_FEATURE_FILENAME) as testFeatFile:
         for line in testFeatFile:
-            if line.rstrip():
-                lineList = line.rstrip().split(" ")
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(" ")
                 testFrameNames.append( lineList.pop(0) )
                 testFeats.append( [ float(ele) for ele in lineList ] )
     
     return (testFeats, testFrameNames)
+
+def parseHw1Csv(CSV_FILENAME):
+    frameNames = list()
+    labels = list()
+
+    with open(CSV_FILENAME) as csvFile:
+        csvFile.readline()
+        for line in csvFile:
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(",")
+                frameNames.append(lineList[0])
+                labels.append(lineList[1])
+
+    return (frameNames, labels)
 
 def outputPartAAsCsv(obser, transition, TEST_CSV_FILE_NAME):
     with open(TEST_CSV_FILE_NAME, 'w') as testCsvFile:
@@ -46,66 +62,48 @@ def outputPartAAsCsv(obser, transition, TEST_CSV_FILE_NAME):
         for i in xrange(len(transition)):
             testCsvFile.write('faem0_si1392_' + str(i + len(obser)) + ',' + str(transition[i]) + '\n')
 
-def trimFrameNames(frameNameList):
+def getUtterNamesFromFrameNames(frameNameList):
     #input: ['fadg0_si1279_1', 'fadg0_si1279_2', ..., 'fadg0_si1909_1', 'fadg0_si1909_2', ...]
     #output: ['fadg0_si1279', 'fadg0_si1909', ...]
     #need to make sure the input has no empty string inside(in the end)
-    trimmedNameList = list()
+    utterNameList = list()
 
-    prevSplitName = frameNameList[0].split('_') #should .strip()?
-    splitName = prevSplitName   #point to same list, not copy. doesn't matter in this case
-    trimmedNameList.append(splitName[0] + '_' + splitName[1])
+    prevUtterName, frameNum = getFrameNameAndNumber(frameNameList[0])
+    utterNameList.append(prevUtterName)
     
     for frameName in frameNameList:
-        splitName = frameName.split('_')
-        if splitName[0] != prevSplitName[0] or splitName[1] != prevSplitName[1]:
-            trimmedNameList.append(splitName[0] + '_' + splitName[1])
-            prevSplitName = splitName
-            # prevSplitName is updated when the first two elements
-            # of prevSplitName and splitName are different.
-            # so the third element is always '1'
-    return trimmedNameList
+        utterName, frameNum = getFrameNameAndNumber(frameName)
+        if utterName != prevUtterName:
+            utterNameList.append(utterName)
+            prevUtterName = utterName
 
-def getFrameNameAndNumber(frameName):
+    return utterNameList
+
+def getFrameNameAndNumber(frameName):   #should be getUtterNameAndNumber
     regex = re.compile(ur'(.+_.+)_(\d+)')
     result = re.search(regex, frameName)
     return (result.group(1), result.group(2))
 
-def outputPartB(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
-    with open(OUTPUT_CSV_FILE_NAME, 'w') as testCsvFile:
+def parseTestLabelsHw2(TEST_LABEL_FILENAME):
+    #output: [ [37,37,37,...], [37,37,37,...], ... ]
+    testLabelList = list()
+    with open(TEST_LABEL_FILENAME) as labelFile:
+        for line in labelFile:
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(' ')
+                testLabelList.append( [ int(ele) for ele in lineList ] )
+    return testLabelList
+
+
+def outputPartB(utterNames, utterCharStrings, OUTPUT_CSV_FILENAME):
+    #utterNames: ['fadg0_si1279', 'fadg0_si1909', ...]
+    #utterCharStrings: ['HIrwLA...', 'vLJLtH...', ...]
+    with open(OUTPUT_CSV_FILENAME, 'w') as testCsvFile:
         testCsvFile.write("id,phone_sequence")
-        for i in xrange(len(trimmedTestFrameNames)):
-            testCsvFile.write('\n' + trimmedTestFrameNames[i] + ',' + testLabelStrings[i])
+        for i in xrange(len(utterNames)):
+            testCsvFile.write('\n' + utterNames[i] + ',' + utterCharStrings[i])
 
-def outputUtteranceCount(trainParameter, OUTPUT_FILE_NAME):
-    with open(OUTPUT_FILE_NAME, 'w') as testFile:
-        for i in xrange(len(trainParameter)):
-            testFile.write(str(trainParameter[i]))
-            if i != len(trainParameter) - 1:
-                testFile.write('\n')
-
-def outputFeatureParseToC(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
-    with open(OUTPUT_FILE_NAME, 'w') as testFile:
-        for i in xrange(len(trainParameter1)):
-            testFile.write(str(trainParameter1[i]))
-            testFile.write('\n')
-            for j in xrange(len(trainParameter2[i])):
-                if j == len(trainParameter2[i]) - 1:
-                    testFile.write(str(trainParameter2[i][j]))
-                else:
-                    testFile.write(str(trainParameter2[i][j]) + ' ')
-            if i != len(trainParameter2) - 1:
-                testFile.write('\n')
-
-def outputTestParseToC(trainParameter, OUTPUT_FILE_NAME):
-    with open(OUTPUT_FILE_NAME, 'w') as testFile:
-        for i in xrange(len(trainParameter)):
-            testFile.write(str(-1))
-            testFile.write('\n')
-            for j in xrange(len(trainParameter[i])):
-                if j == len(trainParameter[i]) - 1:
-                    testFile.write(str(trainParameter[i][j]))
-                else:
-                    testFile.write(str(trainParameter[i][j]) + ' ')
-            if i != len(trainParameter) - 1:
-                testFile.write('\n')
+if __name__ == '__main__':
+    print getFrameNameAndNumber('adsf_dfs_123')
+    print getUtterNamesFromFrameNames(['fadsf_asdfads_1', 'fadsf_asdfads_12', 'fadsf_a_1', 'fadsf_a_1'])
