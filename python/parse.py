@@ -104,12 +104,32 @@ def outputPartB(utterNames, utterCharStrings, OUTPUT_CSV_FILENAME):
         for i in xrange(len(utterNames)):
             testCsvFile.write('\n' + utterNames[i] + ',' + utterCharStrings[i])
 
-def outputUtteranceCount(trainParameter, OUTPUT_FILE_NAME):
-    with open(OUTPUT_FILE_NAME, 'w') as testFile:
-        for i in xrange(len(trainParameter)):
-            testFile.write(str(trainParameter[i]))
-            if i != len(trainParameter) - 1:
-                testFile.write('\n')
+def countUtterLength(frameNameList):
+    frameCounter = 0
+    utterCountList = list()
+    prevUtterName, useless = getFrameNameAndNumber(frameNameList[0])
+
+    for frameName in frameNameList:
+        utterName, useless = getFrameNameAndNumber(frameName)
+        if utterName != prevUtterName:
+            utterCountList.append(frameCounter)
+            prevUtterName = utterName
+            frameCounter = 1
+        else:
+            frameCounter += 1
+    utterCountList.append(frameCounter)
+    return utterCountList
+
+def outputUtterCount(utterCounts, OUTPUT_FILE_NAME):
+    #utterCounts: [202, 153, 345, ...]
+    with open(OUTPUT_FILE_NAME, 'w') as outputFile:
+        outputFile.write(str(utterCounts[0]))
+        for i in xrange(1,len(utterCounts)):
+            outputFile.write('\n' + str(utterCounts[i]))
+        #for i in xrange(len(trainParameter)):
+        #    testFile.write(str(trainParameter[i]))
+        #    if i != len(trainParameter) - 1:
+        #        testFile.write('\n')
 
 def outputFeatureParseToC(trainParameter1, trainParameter2, OUTPUT_FILE_NAME):
     with open(OUTPUT_FILE_NAME, 'w') as testFile:
