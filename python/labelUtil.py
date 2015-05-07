@@ -61,6 +61,7 @@ def trimIndices(indexList):
     return trimmedIndexList
 
 def smoothLabels(indexList, windowSize=5):
+    #indexList should be labels39
     if windowSize < 1:
         print "smoothLabels ereror: windowSize is smaller than 1."
         return None
