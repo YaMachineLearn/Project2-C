@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include "svm_struct/svm_struct_common.h"
 #include "svm_struct_api.h"
-#define  UTTER_COUNT 2//3696
 
 void svm_struct_learn_api_init(int argc, char* argv[])
 {
@@ -54,10 +53,10 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
      examples must be written into sample.n */
   SAMPLE   sample;  /* sample */
   EXAMPLE  *examples;
-  long     n;       /* number of examples */
+  int      *utterFrameCount;
+  long     n;       /* number of utterance */
 
-  n = UTTER_COUNT; /* replace by appropriate number of examples */
-  examples = (EXAMPLE *)my_malloc(sizeof(EXAMPLE) * n);
+  n = 0;
   int featDim = 69;
 
   /* parse filenames */
@@ -65,14 +64,18 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   char *file2 = strtok(NULL, ",");
 
   /* utterance count  */
-  int utterFrameCount[UTTER_COUNT]; // expLength
   FILE *fpUtter;
-  //char *lineUtter = NULL;
 
   fpUtter = fopen(file1, "r");
-  // if (fpUtter == NULL) return 0;
   int utterIndex = 0;
   int tempValueUtter = 0;
+
+  fscanf(fpUtter, "%d", &tempValueUtter);
+  n = tempValueUtter;
+
+  utterFrameCount = (int *)my_malloc(n * sizeof(int));
+  examples = (EXAMPLE *)my_malloc(n * sizeof(EXAMPLE));
+
   while (fscanf(fpUtter, "%d", &tempValueUtter) != EOF) {
     utterFrameCount[utterIndex] = tempValueUtter;
     utterIndex++;
@@ -82,7 +85,7 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
 
   /* initialize examples */
   int i = 0;
-  for (i = 0; i < UTTER_COUNT; ++i) {
+  for (i = 0; i < n; ++i) {
     examples[i].x.length = utterFrameCount[i];
     examples[i].x.features = (double **)my_malloc(utterFrameCount[i] * sizeof(double *));
     examples[i].y.length = utterFrameCount[i];
@@ -96,7 +99,6 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
   ssize_t read;
 
   dataFile = fopen(file2, "r");
-  //if (dataFile == NULL) return 0;
 
   int lineIndex = 1;
   int label = 0;
@@ -132,22 +134,6 @@ SAMPLE read_struct_examples(char *file, STRUCT_LEARN_PARM *sparm)
       frameIndex = 0;
     }
   }
-  
-  // printf("utterFrameCount[0] (474): %d\n", utterFrameCount[0]);
-  // printf("utterFrameCount[3695] (222): %d\n", utterFrameCount[n - 1]);
-  // printf("examples[0].y.labels[0] (37): %d\n", examples[0].y.labels[0]);
-  // printf("examples[0].y.labels[473] (37): %d\n", examples[0].y.labels[473]);
-  // printf("examples[0].x.features[0][0] (3.148541): %f\n", examples[0].x.features[0][0]);
-  // printf("examples[0].x.features[0][68] (-0.06928831): %f\n", examples[0].x.features[0][68]);
-  // printf("examples[0].x.features[473][0] (2.67818): %f\n", examples[0].x.features[473][0]);
-  // printf("examples[0].x.features[473][68] (-0.02532601): %f\n", examples[0].x.features[473][68]);
-
-  // printf("examples[n-1].y.labels[0] (37): %d\n", examples[n-1].y.labels[0]);
-  // printf("examples[n-1].y.labels[221] (37): %d\n", examples[n-1].y.labels[221]);
-  //printf("examples[n-1].x.features[0][0] (2.982506): %f\n", examples[n-1].x.features[0][0]);
-  //printf("examples[n-1].x.features[0][68] (-0.06928831): %f\n", examples[n-1].x.features[0][68]);
-  // printf("examples[n-1].x.features[221][0] (2.982506): %f\n", examples[n-1].x.features[221][0]);
-  // printf("examples[n-1].x.features[221][68] (0.02890646): %f\n", examples[n-1].x.features[221][68]);
 
   sample.n = n;
   sample.examples = examples;
@@ -273,13 +259,6 @@ LABEL classify_struct_example(PATTERN x, STRUCTMODEL *sm, STRUCT_LEARN_PARM *spa
     maxCostIndex = lastPhone[maxCostIndex][frameIndex + 1];
     y.labels[frameIndex] = maxCostIndex;
   }
-
-  // printf("\nIn classify_struct_example:\nsm.w\n");
-  // for (i = 0; i < sm->sizePsi + 1; i++) {
-  //   printf("%f ", sm->w[i]);
-  // }
-  // printf("\nsparm->num_classes: %d", sparm->num_classes);
-  // printf("\nsparm->num_features: %d\n", sparm->num_features);
 
   for (lab = 0; lab < sparm->num_classes; lab++) {
     free(lastPhone[lab]);
