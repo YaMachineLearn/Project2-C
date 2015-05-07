@@ -123,9 +123,9 @@ def countUtterLength(frameNameList):
 def outputUtterCount(utterCounts, OUTPUT_FILE_NAME):
     #utterCounts: [202, 153, 345, ...]
     with open(OUTPUT_FILE_NAME, 'w') as outputFile:
-        outputFile.write(str(utterCounts[0]))
-        for i in xrange(1,len(utterCounts)):
-            outputFile.write('\n' + str(utterCounts[i]))
+        outputFile.write(str(len(utterCounts)))     #first line: total number of utterances
+        for utterLen in utterCounts:
+            outputFile.write('\n' + str(utterLen))
         #for i in xrange(len(trainParameter)):
         #    testFile.write(str(trainParameter[i]))
         #    if i != len(trainParameter) - 1:
